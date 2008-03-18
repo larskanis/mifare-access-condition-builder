@@ -6,7 +6,7 @@
 #
 # Copyright: See COPYING file that comes with this distribution
 #
-# $Id: mifare_acc.rb,v 1.4 2008/03/18 16:29:28 kanis Exp $
+# $Id: mifare_acc.rb,v 1.5 2008/03/18 18:55:24 kanis Exp $
 ###########################################################################
 #
 
@@ -43,6 +43,7 @@ class MifAccMain < Fox::FXMainWindow
         @hex_input = FXTextField.new(hex_frame,0, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X){|this|
           this.setFocus
           this.connect(SEL_COMMAND, method(:hex_changed))
+          this.text = 'FF0780'
         }
       }
       @message = FXLabel.new(theFrame, ''){|this|
@@ -121,6 +122,9 @@ class MifAccMain < Fox::FXMainWindow
         end
       }
     }
+    
+    # sinnvolle default-Werte in Felder eintragen
+    hex_changed(nil,nil,nil)
   end
   
   def display_error
@@ -141,8 +145,6 @@ class MifAccMain < Fox::FXMainWindow
     display_error{
       bits = acc_hex_to_bits(hex)
 #       puts bits
-      hex2 = acc_bits_to_hex(bits)
-      raise InvalidArgument, "Hex-Daten sind inkonsistent: #{hex}!=#{hex2}" unless hex.upcase==hex2.upcase
       
       @acc_blocks.each_with_index{|bl, blidx|
         bl.bits.text = bits[blidx]
@@ -156,15 +158,14 @@ class MifAccMain < Fox::FXMainWindow
     blocksbits = @acc_blocks.map{|ab| ab.bits.text }
 #     puts "bits-input: #{blocksbits.inspect}"
     
-    hex = nil
+    hex = ''
     display_error{
       hex = acc_bits_to_hex(blocksbits)
 #       puts hex
     }
     display_bits_desc
     
-    @hex_input.text = hex
-		@hex_input.text = @hex_input.text.upcase
+    @hex_input.text = hex.upcase
   end
   
   class InvalidArgument < RuntimeError # :nodoc:
@@ -183,14 +184,17 @@ class MifAccMain < Fox::FXMainWindow
         blockbits << (onoff>0 ? '1' : '0')
       }
     }
+    hex2 = acc_bits_to_hex(blocksbits)
+    raise InvalidArgument, "Hex-Daten sind inkonsistent: #{hex}!=#{hex2}" unless hex.upcase==hex2.upcase
+    
     return blocksbits
   end
 
   def acc_bits_to_hex(blocksbits)
     raise InvalidArgument, "Bits fuer 4 Bloecke erwartet: #{blocksbits.inspect}" unless blocksbits.length==4
     
-    blocksbits.each{|bit|
-      raise InvalidArgument, "3 Bit String erwartet: #{bit.inspect}" unless bit=~/^[0-1]{3,3}$/i
+    blocksbits.each_with_index{|bit, bidx|
+      raise InvalidArgument, "3 Bit String für Block #{bidx} erwartet: #{bit.inspect}" unless bit=~/^[0-1]{3,3}$/i
     }
     
     nibbles = [0,0,0]
