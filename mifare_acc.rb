@@ -6,7 +6,7 @@
 #
 # Copyright: See COPYING file that comes with this distribution
 #
-# $Id: mifare_acc.rb,v 1.3 2008/03/18 15:47:28 kanis Exp $
+# $Id: mifare_acc.rb,v 1.4 2008/03/18 16:29:28 kanis Exp $
 ###########################################################################
 #
 
@@ -164,6 +164,7 @@ class MifAccMain < Fox::FXMainWindow
     display_bits_desc
     
     @hex_input.text = hex
+		@hex_input.text = @hex_input.text.upcase
   end
   
   class InvalidArgument < RuntimeError # :nodoc:
