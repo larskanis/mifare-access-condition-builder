@@ -6,7 +6,7 @@
 #
 # Copyright: See COPYING file that comes with this distribution
 #
-# $Id: mifare_acc.rb,v 1.5 2008/03/18 18:55:24 kanis Exp $
+# $Id: mifare_acc.rb,v 1.6 2008/03/18 19:13:09 kanis Exp $
 ###########################################################################
 #
 
@@ -64,7 +64,8 @@ class MifAccMain < Fox::FXMainWindow
           acc_block.bits.connect(SEL_COMMAND, method(:bits_changed))
           FXLabel.new(matrix,'->')
           for desc in 0...5
-            acc_block.descs << FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY)
+            acc_block.descs << FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
+
           end
           @acc_blocks << acc_block
         end
@@ -81,7 +82,7 @@ class MifAccMain < Fox::FXMainWindow
         acc_block.bits.connect(SEL_COMMAND, method(:bits_changed))
         FXLabel.new(matrix,'->')
         for desc in 0...7
-          acc_block.descs << FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY)
+          acc_block.descs << FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
         end
         @acc_blocks << acc_block
       }
@@ -95,11 +96,11 @@ class MifAccMain < Fox::FXMainWindow
         FXLabel.new(matrix, 'description                 ')
         
         for bits, descs in DataBitsDesc.sort do
-          field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY)
+          field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
           field.text = bits
           FXLabel.new(matrix,'->')
           for desc in descs
-            field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY)
+            field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
             field.text = desc
           end
         end
@@ -112,11 +113,11 @@ class MifAccMain < Fox::FXMainWindow
         FXLabel.new(matrix, 'description                 ')
         
         for bits, descs in AccBitsDesc.sort do
-          field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY)
+          field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
           field.text = bits
           FXLabel.new(matrix,'->')
           for desc in descs
-            field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY)
+            field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
             field.text = desc
           end
         end
