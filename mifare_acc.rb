@@ -6,7 +6,7 @@
 #
 # Copyright: See COPYING file that comes with this distribution
 #
-# $Id: mifare_acc.rb,v 1.6 2008/03/18 19:13:09 kanis Exp $
+# $Id: mifare_acc.rb,v 1.7 2008/03/18 19:41:07 kanis Exp $
 ###########################################################################
 #
 
@@ -55,7 +55,7 @@ class MifAccMain < Fox::FXMainWindow
         ['','bits','','read', 'write', 'increment', 'dec,tran,dec'].each{|labeltext|
           FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
         }
-        FXLabel.new(matrix, 'description                 ')
+        FXLabel.new(matrix, 'description')
         
         for blocknr in 0..2 do
           acc_block = AccBlock.new nil, []
@@ -64,8 +64,7 @@ class MifAccMain < Fox::FXMainWindow
           acc_block.bits.connect(SEL_COMMAND, method(:bits_changed))
           FXLabel.new(matrix,'->')
           for desc in 0...5
-            acc_block.descs << FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
-
+            acc_block.descs << FXLabel.new(matrix, '', nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::LightGoldenrod1 }
           end
           @acc_blocks << acc_block
         end
@@ -74,7 +73,7 @@ class MifAccMain < Fox::FXMainWindow
         ['','bits','', 'read A', 'write A', 'read ACC', 'write ACC', 'read B', 'write B'].each{|labeltext|
           FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
         }
-        FXLabel.new(matrix, 'description                 ')
+        FXLabel.new(matrix, 'description')
         
         acc_block = AccBlock.new nil, []
         FXLabel.new(matrix, "Block 3", nil, LAYOUT_FILL_X)
@@ -82,7 +81,7 @@ class MifAccMain < Fox::FXMainWindow
         acc_block.bits.connect(SEL_COMMAND, method(:bits_changed))
         FXLabel.new(matrix,'->')
         for desc in 0...7
-          acc_block.descs << FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
+          acc_block.descs << FXLabel.new(matrix,'', nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::PaleGreen }
         end
         @acc_blocks << acc_block
       }
@@ -93,15 +92,13 @@ class MifAccMain < Fox::FXMainWindow
         ['bits','','read', 'write', 'increment', 'dec,tran,dec'].each{|labeltext|
           FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
         }
-        FXLabel.new(matrix, 'description                 ')
+        FXLabel.new(matrix, 'description')
         
         for bits, descs in DataBitsDesc.sort do
-          field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
-          field.text = bits
+          field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::LightGoldenrod1 }
           FXLabel.new(matrix,'->')
           for desc in descs
-            field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
-            field.text = desc
+            FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::LightGoldenrod1 }
           end
         end
       }
@@ -110,15 +107,13 @@ class MifAccMain < Fox::FXMainWindow
         ['bits','', 'read A', 'write A', 'read ACC', 'write ACC', 'read B', 'write B'].each{|labeltext|
           FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
         }
-        FXLabel.new(matrix, 'description                 ')
+        FXLabel.new(matrix, 'description')
         
         for bits, descs in AccBitsDesc.sort do
-          field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
-          field.text = bits
+          field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::PaleGreen }
           FXLabel.new(matrix,'->')
           for desc in descs
-            field = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::AntiqueWhite }
-            field.text = desc
+            FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::PaleGreen }
           end
         end
       }
@@ -224,12 +219,12 @@ class MifAccMain < Fox::FXMainWindow
   AccBitsDesc = {
     '000' => ['-', 'A', 'A', '-', 'A', 'A', 'Key B may be read'],
     '010' => ['-', '-', 'A', '-', 'A', '-', 'Key B may be read'],
-    '100' => ['-', 'B', 'A|B', '-', '-', 'B', ''],
-    '110' => ['-', '-', 'A|B', '-', '-', '-', ''],
+    '100' => ['-', 'B', 'A|B', '-', '-', 'B', ' '],
+    '110' => ['-', '-', 'A|B', '-', '-', '-', ' '],
     '001' => ['-', 'A', 'A', 'A', 'A', 'A', 'Key B may be read, transport config'],
-    '011' => ['-', 'B', 'A|B', 'B', '-', 'B', ''],
-    '101' => ['-', '-', 'A|B', 'B', '-', '-', ''],
-    '111' => ['-', '-', 'A|B', '-', '-', '-', ''],
+    '011' => ['-', 'B', 'A|B', 'B', '-', 'B', ' '],
+    '101' => ['-', '-', 'A|B', 'B', '-', '-', ' '],
+    '111' => ['-', '-', 'A|B', '-', '-', '-', ' '],
   }
   
   def display_bits_desc
