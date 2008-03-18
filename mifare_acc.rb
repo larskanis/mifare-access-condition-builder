@@ -6,20 +6,13 @@
 #
 # Copyright: See COPYING file that comes with this distribution
 #
-# $Id: mifare_acc.rb,v 1.7 2008/03/18 19:41:07 kanis Exp $
+# $Id: mifare_acc.rb,v 1.8 2008/03/18 20:22:40 kanis Exp $
 ###########################################################################
 #
 
 require 'rubygems'
 require 'fox16'
 require 'fox16/colors'
-
-
-class String
-  def without_left_whitespace
-    gsub(/^[\t ]*(.*)$/){ $1 }
-  end
-end
 
 
 class MifAccMain < Fox::FXMainWindow
@@ -43,7 +36,7 @@ class MifAccMain < Fox::FXMainWindow
         @hex_input = FXTextField.new(hex_frame,0, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X){|this|
           this.setFocus
           this.connect(SEL_COMMAND, method(:hex_changed))
-          this.text = 'FF0780'
+          this.text = 'FF 07 80'
         }
       }
       @message = FXLabel.new(theFrame, ''){|this|
@@ -156,18 +149,19 @@ class MifAccMain < Fox::FXMainWindow
     
     hex = ''
     display_error{
-      hex = acc_bits_to_hex(blocksbits)
+      hex = acc_bits_to_hex(blocksbits).upcase
 #       puts hex
     }
     display_bits_desc
     
-    @hex_input.text = hex.upcase
+    @hex_input.text = [hex[0,2], hex[2,2], hex[4..-1]].join(" ")
   end
   
   class InvalidArgument < RuntimeError # :nodoc:
   end
   
   def acc_hex_to_bits(hex)
+    hex = hex.gsub(/\s/, '')
     raise InvalidArgument, "3 Byte Hex-String erwartet: #{hex.inspect}" unless hex=~/^[0-9a-f]{6,6}$/i
     
     blocksbits = ['','','','']
@@ -201,7 +195,8 @@ class MifAccMain < Fox::FXMainWindow
         nibbles[nidx] = nibble
       }
     }
-    return sprintf("%x%x%x%x%x%x", nibbles[1] ^ 0xf, nibbles[0] ^ 0xf,
+    return sprintf("%x%x%x%x%x%x",
+      nibbles[1] ^ 0xf, nibbles[0] ^ 0xf,
       nibbles[0], nibbles[2] ^ 0xf,
       nibbles[2], nibbles[1])
   end
