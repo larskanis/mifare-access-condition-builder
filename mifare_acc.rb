@@ -6,7 +6,7 @@
 #
 # Copyright: See COPYING file that comes with this distribution
 #
-# $Id: mifare_acc.rb,v 1.2 2008/03/18 15:46:55 kanis Exp $
+# $Id: mifare_acc.rb,v 1.3 2008/03/18 15:47:28 kanis Exp $
 ###########################################################################
 #
 
@@ -29,7 +29,7 @@ class MifAccMain < Fox::FXMainWindow
   
 	def initialize(app)
 		# Initialize base class
-		super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 650, 700)
+		super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 650, 670)
 		
     # Tooltips einschalten und auf dauerhafte Anzeige einstellen.
     FXToolTip.new(getApp(), TOOLTIP_PERMANENT)
