@@ -6,7 +6,7 @@
 #
 # Copyright: See COPYING file that comes with this distribution
 #
-# $Id: mifare_acc.rb,v 1.1 2008/03/18 15:38:51 kanis Exp $
+# $Id: mifare_acc.rb,v 1.2 2008/03/18 15:46:55 kanis Exp $
 ###########################################################################
 #
 
@@ -135,12 +135,12 @@ class MifAccMain < Fox::FXMainWindow
   
   def hex_changed(sender, sel, ptr)
     hex = @hex_input.text
-    puts "hex-input: #{hex}"
+#     puts "hex-input: #{hex}"
     
     bits = nil
     display_error{
       bits = acc_hex_to_bits(hex)
-      puts bits
+#       puts bits
       hex2 = acc_bits_to_hex(bits)
       raise InvalidArgument, "Hex-Daten sind inkonsistent: #{hex}!=#{hex2}" unless hex.upcase==hex2.upcase
       
@@ -154,12 +154,12 @@ class MifAccMain < Fox::FXMainWindow
   
   def bits_changed(sender, sel, ptr)
     blocksbits = @acc_blocks.map{|ab| ab.bits.text }
-    puts "bits-input: #{blocksbits.inspect}"
+#     puts "bits-input: #{blocksbits.inspect}"
     
     hex = nil
     display_error{
       hex = acc_bits_to_hex(blocksbits)
-      puts hex
+#       puts hex
     }
     display_bits_desc
     
@@ -175,10 +175,10 @@ class MifAccMain < Fox::FXMainWindow
     blocksbits = ['','','','']
     nibbles = [hex[2,1].hex, hex[5,1].hex, hex[4,1].hex]
     nibbles.each{|nibble|
-      puts "nibble: #{nibble.inspect}"
+#       puts "nibble: #{nibble.inspect}"
       blocksbits.each_with_index{|blockbits, bbidx|
         onoff = (nibble >> bbidx) & 1
-        puts "onoff: #{onoff.inspect} bits: #{blockbits.inspect}"
+#         puts "onoff: #{onoff.inspect} bits: #{blockbits.inspect}"
         blockbits << (onoff>0 ? '1' : '0')
       }
     }
