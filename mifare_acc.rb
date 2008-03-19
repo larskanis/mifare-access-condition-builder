@@ -6,7 +6,7 @@
 #
 # Copyright: See COPYING file that comes with this distribution
 #
-# $Id: mifare_acc.rb,v 1.8 2008/03/18 20:22:40 kanis Exp $
+# $Id: mifare_acc.rb,v 1.9 2008/03/19 10:13:43 kanis Exp $
 ###########################################################################
 #
 
@@ -27,7 +27,8 @@ class MifAccMain < Fox::FXMainWindow
     # Tooltips einschalten und auf dauerhafte Anzeige einstellen.
     FXToolTip.new(getApp(), TOOLTIP_PERMANENT)
     
-		top = FXVerticalFrame.new(self, LAYOUT_FILL_X|LAYOUT_FILL_Y){|theFrame|
+    scrollwindow = FXScrollWindow.new(self, LAYOUT_FILL_X | LAYOUT_FILL_Y)
+		top = FXVerticalFrame.new(scrollwindow, LAYOUT_FILL_X | LAYOUT_FILL_Y){|theFrame|
 			theFrame.padLeft = theFrame.padRight = theFrame.padBottom = theFrame.padTop = 5
 			theFrame.vSpacing = 5
       
