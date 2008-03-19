@@ -6,7 +6,7 @@
 #
 # Copyright: See COPYING file that comes with this distribution
 #
-# $Id: mifare_acc.rb,v 1.9 2008/03/19 10:13:43 kanis Exp $
+# $Id: mifare_acc.rb,v 1.10 2008/03/19 12:03:03 kanis Exp $
 ###########################################################################
 #
 
@@ -22,13 +22,13 @@ class MifAccMain < Fox::FXMainWindow
   
 	def initialize(app)
 		# Initialize base class
-		super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 650, 670)
+		super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 750, 230)
 		
     # Tooltips einschalten und auf dauerhafte Anzeige einstellen.
     FXToolTip.new(getApp(), TOOLTIP_PERMANENT)
     
-    scrollwindow = FXScrollWindow.new(self, LAYOUT_FILL_X | LAYOUT_FILL_Y)
-		top = FXVerticalFrame.new(scrollwindow, LAYOUT_FILL_X | LAYOUT_FILL_Y){|theFrame|
+#    scrollwindow = FXScrollWindow.new(self, LAYOUT_FILL_X | LAYOUT_FILL_Y)
+		top = FXVerticalFrame.new(self, LAYOUT_FILL_X | LAYOUT_FILL_Y){|theFrame|
 			theFrame.padLeft = theFrame.padRight = theFrame.padBottom = theFrame.padTop = 5
 			theFrame.vSpacing = 5
       
@@ -46,10 +46,9 @@ class MifAccMain < Fox::FXMainWindow
       
       @acc_blocks = []
       FXMatrix.new(theFrame, 8, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
-        ['','bits','','read', 'write', 'increment', 'dec,tran,dec'].each{|labeltext|
+        [''].+(DataBitsHead).each{|labeltext|
           FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
         }
-        FXLabel.new(matrix, 'description')
         
         for blocknr in 0..2 do
           acc_block = AccBlock.new nil, []
@@ -58,16 +57,21 @@ class MifAccMain < Fox::FXMainWindow
           acc_block.bits.connect(SEL_COMMAND, method(:bits_changed))
           FXLabel.new(matrix,'->')
           for desc in 0...5
-            acc_block.descs << FXLabel.new(matrix, '', nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::LightGoldenrod1 }
+            acc_block.descs << FXLabel.new(matrix, '', nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this|
+              this.backColor = FXColor::LightGoldenrod1
+              bits_field = acc_block.bits
+              this.connect(SEL_LEFTBUTTONPRESS){|sender, sel, ptr|
+                desc_clicked(sender, sel, ptr, bits_field, :data)
+              }
+            }
           end
           @acc_blocks << acc_block
         end
       }
       FXMatrix.new(theFrame, 10, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
-        ['','bits','', 'read A', 'write A', 'read ACC', 'write ACC', 'read B', 'write B'].each{|labeltext|
+        [''].+(TrailerBitsHead).each{|labeltext|
           FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
         }
-        FXLabel.new(matrix, 'description')
         
         acc_block = AccBlock.new nil, []
         FXLabel.new(matrix, "Block 3", nil, LAYOUT_FILL_X)
@@ -75,46 +79,24 @@ class MifAccMain < Fox::FXMainWindow
         acc_block.bits.connect(SEL_COMMAND, method(:bits_changed))
         FXLabel.new(matrix,'->')
         for desc in 0...7
-          acc_block.descs << FXLabel.new(matrix,'', nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::PaleGreen }
+          acc_block.descs << FXLabel.new(matrix,'', nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this|
+            this.backColor = FXColor::PaleGreen
+            bits_field = acc_block.bits
+            this.connect(SEL_LEFTBUTTONPRESS){|sender, sel, ptr|
+              desc_clicked(sender, sel, ptr, bits_field, :trailer)
+            }
+          }
         end
         @acc_blocks << acc_block
       }
-		
-      FXLabel.new(theFrame, "\n\nMögliche Bit-Kombinationen für Datenblöcke:")
-    
-      FXMatrix.new(theFrame, 7, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
-        ['bits','','read', 'write', 'increment', 'dec,tran,dec'].each{|labeltext|
-          FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
-        }
-        FXLabel.new(matrix, 'description')
-        
-        for bits, descs in DataBitsDesc.sort do
-          field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::LightGoldenrod1 }
-          FXLabel.new(matrix,'->')
-          for desc in descs
-            FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::LightGoldenrod1 }
-          end
-        end
-      }
-      FXLabel.new(theFrame, "Mögliche Bit-Kombinationen für Trailerblöcke:")
-      FXMatrix.new(theFrame, 9, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
-        ['bits','', 'read A', 'write A', 'read ACC', 'write ACC', 'read B', 'write B'].each{|labeltext|
-          FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
-        }
-        FXLabel.new(matrix, 'description')
-        
-        for bits, descs in AccBitsDesc.sort do
-          field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::PaleGreen }
-          FXLabel.new(matrix,'->')
-          for desc in descs
-            FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::PaleGreen }
-          end
-        end
-      }
     }
-    
     # sinnvolle default-Werte in Felder eintragen
-    hex_changed(nil,nil,nil)
+    hex_changed
+  end
+  
+  def create
+    super
+    show(PLACEMENT_SCREEN)
   end
   
   def display_error
@@ -127,7 +109,7 @@ class MifAccMain < Fox::FXMainWindow
     end
   end
   
-  def hex_changed(sender, sel, ptr)
+  def hex_changed(sender=nil, sel=nil, ptr=nil)
     hex = @hex_input.text
 #     puts "hex-input: #{hex}"
     
@@ -144,7 +126,7 @@ class MifAccMain < Fox::FXMainWindow
     display_bits_desc
   end
   
-  def bits_changed(sender, sel, ptr)
+  def bits_changed(sender=nil, sel=nil, ptr=nil)
     blocksbits = @acc_blocks.map{|ab| ab.bits.text }
 #     puts "bits-input: #{blocksbits.inspect}"
     
@@ -202,6 +184,7 @@ class MifAccMain < Fox::FXMainWindow
       nibbles[2], nibbles[1])
   end
   
+  DataBitsHead = ['bits','','read', 'write', 'increment', 'dec,tran,dec', 'description']
   DataBitsDesc = {
     '000' => ['A|B¹', 'A|B¹', 'A|B¹', 'A|B¹', 'transport config'],
     '010' => ['A|B¹', '-', '-', '-', 'read/write block'],
@@ -212,7 +195,8 @@ class MifAccMain < Fox::FXMainWindow
     '101' => ['B¹', '-', '-', '-', 'read/write block'],
     '111' => ['-', '-', '-', '-', 'read/write block'],
   }
-  AccBitsDesc = {
+  TrailerBitsHead = ['bits','', 'read A', 'write A', 'read ACC', 'write ACC', 'read B', 'write B', 'description']
+  TrailerBitsDesc = {
     '000' => ['-', 'A', 'A', '-', 'A', 'A', 'Key B may be read'],
     '010' => ['-', '-', 'A', '-', 'A', '-', 'Key B may be read'],
     '100' => ['-', 'B', 'A|B', '-', '-', 'B', ' '],
@@ -226,7 +210,7 @@ class MifAccMain < Fox::FXMainWindow
   def display_bits_desc
     @acc_blocks.each_with_index{|acc_block, blidx|
       if blidx==3
-        descs = AccBitsDesc[acc_block.bits.text] || Array.new(6,'')
+        descs = TrailerBitsDesc[acc_block.bits.text] || Array.new(6,'')
       else
         descs = DataBitsDesc[acc_block.bits.text] || Array.new(4,'')
       end
@@ -234,9 +218,71 @@ class MifAccMain < Fox::FXMainWindow
     }
   end
 
-  def create
-    super
-    show(PLACEMENT_SCREEN)
+  def desc_clicked(sender, sel, ptr, bits_field, data_or_trailer)
+    sd = SelectionDialog.new(data_or_trailer, sender, "Select Access Conditions", DECOR_ALL)
+    if sd.execute > 0
+      bits = sd.selected_bits
+      bits_field.text = bits
+      bits_changed
+    end
+  end
+  
+  class SelectionDialog < FXDialogBox
+    include Fox
+    
+    attr_reader :selected_bits
+    
+    def initialize(data_or_trailer, *args)
+      super(*args)
+      
+      if data_or_trailer == :data
+        FXLabel.new(self, "Mögliche Bit-Kombinationen für Datenblöcke:")
+      
+        FXMatrix.new(self, 7, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
+          DataBitsHead.each{|labeltext|
+            FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
+          }
+          
+          for bits, descs in DataBitsDesc.sort do
+            field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::LightGoldenrod1 }
+            FXLabel.new(matrix,'->')
+            for desc in descs
+              FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this|
+                this.backColor = FXColor::LightGoldenrod1
+                b = bits
+                this.connect(SEL_LEFTBUTTONPRESS){
+                  @selected_bits = b
+                  self.handle(self, FXSEL(SEL_COMMAND, ID_ACCEPT), nil)
+                }
+              }
+            end
+          end
+        }
+      elsif data_or_trailer == :trailer
+        FXLabel.new(self, "Mögliche Bit-Kombinationen für Trailerblöcke:")
+        
+        FXMatrix.new(self, 9, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
+          TrailerBitsHead.each{|labeltext|
+            FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
+          }
+          
+          for bits, descs in TrailerBitsDesc.sort do
+            field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::PaleGreen }
+            FXLabel.new(matrix,'->')
+            for desc in descs
+              FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this|
+                this.backColor = FXColor::PaleGreen
+                b = bits
+                this.connect(SEL_LEFTBUTTONPRESS){
+                  @selected_bits = b
+                  self.handle(self, FXSEL(SEL_COMMAND, ID_ACCEPT), nil)
+                }
+              }
+            end
+          end
+        }
+      end
+    end
   end
 
 end
