@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'mifare_access_condition_builder'
+require 'fox16'
+
+if __FILE__ == $0
+  app = Fox::FXApp.new("MifAccMain", "ComCard")
+  MifareAccessConditionBuilder::MainWindow.new(app)
+  app.create
+  app.run
+end

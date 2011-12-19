@@ -1,0 +1,9 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/mifare_access_condition_builder
+lib/mifare_access_condition_builder.rb
+mifare_acc.rb
+test/test_mifare_access_condition_builder.rb
