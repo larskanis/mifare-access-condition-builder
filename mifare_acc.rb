@@ -1,12 +1,10 @@
 #! /usr/bin/env ruby
 # -*- coding: utf-8 -*-
 ###########################################################################
-#    Copyright (C) 2004 by Lars Kanis                                      
-#    <kanis@comcard.de>                                                             
+#    Copyright (C) 2004 by Lars Kanis
+#    <kanis@comcard.de>
 #
 # Copyright: See COPYING file that comes with this distribution
-#
-# $Id: mifare_acc.rb,v 1.10 2008/03/19 12:03:03 kanis Exp $
 ###########################################################################
 #
 
@@ -17,21 +15,21 @@ require 'fox16/colors'
 
 class MifAccMain < Fox::FXMainWindow
   include Fox
-  
+
   AccBlock = Struct.new :bits, :descs
-  
-	def initialize(app)
-		# Initialize base class
-		super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 750, 230)
-		
+
+  def initialize(app)
+    # Initialize base class
+    super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 750, 230)
+
     # Tooltips einschalten und auf dauerhafte Anzeige einstellen.
     FXToolTip.new(getApp(), TOOLTIP_PERMANENT)
-    
-#    scrollwindow = FXScrollWindow.new(self, LAYOUT_FILL_X | LAYOUT_FILL_Y)
-		top = FXVerticalFrame.new(self, LAYOUT_FILL_X | LAYOUT_FILL_Y){|theFrame|
-			theFrame.padLeft = theFrame.padRight = theFrame.padBottom = theFrame.padTop = 5
-			theFrame.vSpacing = 5
-      
+
+    #    scrollwindow = FXScrollWindow.new(self, LAYOUT_FILL_X | LAYOUT_FILL_Y)
+    top = FXVerticalFrame.new(self, LAYOUT_FILL_X | LAYOUT_FILL_Y){|theFrame|
+      theFrame.padLeft = theFrame.padRight = theFrame.padBottom = theFrame.padTop = 5
+      theFrame.vSpacing = 5
+
       FXHorizontalFrame.new(theFrame, LAYOUT_FILL_X|LAYOUT_FILL_Y){|hex_frame|
         FXLabel.new(hex_frame, 'Hex-Eingabe (3 Byte):')
         @hex_input = FXTextField.new(hex_frame,0, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X){|this|
@@ -43,13 +41,13 @@ class MifAccMain < Fox::FXMainWindow
       @message = FXLabel.new(theFrame, ''){|this|
         this.textColor = FXColor::Red
       }
-      
+
       @acc_blocks = []
       FXMatrix.new(theFrame, 8, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
         [''].+(DataBitsHead).each{|labeltext|
           FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
         }
-        
+
         for blocknr in 0..2 do
           acc_block = AccBlock.new nil, []
           FXLabel.new(matrix, "Block #{blocknr}", nil, LAYOUT_FILL_X)
@@ -72,7 +70,7 @@ class MifAccMain < Fox::FXMainWindow
         [''].+(TrailerBitsHead).each{|labeltext|
           FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
         }
-        
+
         acc_block = AccBlock.new nil, []
         FXLabel.new(matrix, "Block 3", nil, LAYOUT_FILL_X)
         acc_block.bits = FXTextField.new(matrix,10, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
@@ -93,12 +91,12 @@ class MifAccMain < Fox::FXMainWindow
     # sinnvolle default-Werte in Felder eintragen
     hex_changed
   end
-  
+
   def create
     super
     show(PLACEMENT_SCREEN)
   end
-  
+
   def display_error
     begin
       yield
@@ -108,45 +106,45 @@ class MifAccMain < Fox::FXMainWindow
       @message.text = ''
     end
   end
-  
+
   def hex_changed(sender=nil, sel=nil, ptr=nil)
     hex = @hex_input.text
 #     puts "hex-input: #{hex}"
-    
+
     bits = nil
     display_error{
       bits = acc_hex_to_bits(hex)
 #       puts bits
-      
+
       @acc_blocks.each_with_index{|bl, blidx|
         bl.bits.text = bits[blidx]
-      }  
+      }
     }
-    
+
     display_bits_desc
   end
-  
+
   def bits_changed(sender=nil, sel=nil, ptr=nil)
     blocksbits = @acc_blocks.map{|ab| ab.bits.text }
 #     puts "bits-input: #{blocksbits.inspect}"
-    
+
     hex = ''
     display_error{
       hex = acc_bits_to_hex(blocksbits).upcase
 #       puts hex
     }
     display_bits_desc
-    
+
     @hex_input.text = [hex[0,2], hex[2,2], hex[4..-1]].join(" ")
   end
-  
+
   class InvalidArgument < RuntimeError # :nodoc:
   end
-  
+
   def acc_hex_to_bits(hex)
     hex = hex.gsub(/\s/, '')
     raise InvalidArgument, "3 Byte Hex-String erwartet: #{hex.inspect}" unless hex=~/^[0-9a-f]{6,6}$/i
-    
+
     blocksbits = ['','','','']
     nibbles = [hex[2,1].hex, hex[5,1].hex, hex[4,1].hex]
     nibbles.each{|nibble|
@@ -159,17 +157,17 @@ class MifAccMain < Fox::FXMainWindow
     }
     hex2 = acc_bits_to_hex(blocksbits)
     raise InvalidArgument, "Hex-Daten sind inkonsistent: #{hex}!=#{hex2}" unless hex.upcase==hex2.upcase
-    
+
     return blocksbits
   end
 
   def acc_bits_to_hex(blocksbits)
     raise InvalidArgument, "Bits fuer 4 Bloecke erwartet: #{blocksbits.inspect}" unless blocksbits.length==4
-    
+
     blocksbits.each_with_index{|bit, bidx|
       raise InvalidArgument, "3 Bit String für Block #{bidx} erwartet: #{bit.inspect}" unless bit=~/^[0-1]{3,3}$/i
     }
-    
+
     nibbles = [0,0,0]
     blocksbits.each_with_index{|blockbits, bbidx|
       nibbles.each_with_index{|nibble, nidx|
@@ -183,7 +181,7 @@ class MifAccMain < Fox::FXMainWindow
       nibbles[0], nibbles[2] ^ 0xf,
       nibbles[2], nibbles[1])
   end
-  
+
   DataBitsHead = ['bits','','read', 'write', 'increment', 'dec,tran,dec', 'description']
   DataBitsDesc = {
     '000' => ['A|B¹', 'A|B¹', 'A|B¹', 'A|B¹', 'transport config'],
@@ -206,7 +204,7 @@ class MifAccMain < Fox::FXMainWindow
     '101' => ['-', '-', 'A|B', 'B', '-', '-', ' '],
     '111' => ['-', '-', 'A|B', '-', '-', '-', ' '],
   }
-  
+
   def display_bits_desc
     @acc_blocks.each_with_index{|acc_block, blidx|
       if blidx==3
@@ -226,23 +224,23 @@ class MifAccMain < Fox::FXMainWindow
       bits_changed
     end
   end
-  
+
   class SelectionDialog < FXDialogBox
     include Fox
-    
+
     attr_reader :selected_bits
-    
+
     def initialize(data_or_trailer, *args)
       super(*args)
-      
+
       if data_or_trailer == :data
         FXLabel.new(self, "Mögliche Bit-Kombinationen für Datenblöcke:")
-      
+
         FXMatrix.new(self, 7, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
           DataBitsHead.each{|labeltext|
             FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
           }
-          
+
           for bits, descs in DataBitsDesc.sort do
             field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::LightGoldenrod1 }
             FXLabel.new(matrix,'->')
@@ -260,12 +258,12 @@ class MifAccMain < Fox::FXMainWindow
         }
       elsif data_or_trailer == :trailer
         FXLabel.new(self, "Mögliche Bit-Kombinationen für Trailerblöcke:")
-        
+
         FXMatrix.new(self, 9, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
           TrailerBitsHead.each{|labeltext|
             FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
           }
-          
+
           for bits, descs in TrailerBitsDesc.sort do
             field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::PaleGreen }
             FXLabel.new(matrix,'->')
@@ -288,9 +286,9 @@ class MifAccMain < Fox::FXMainWindow
 end
 
 if __FILE__ == $0
-	app = Fox::FXApp.new("MifAccMain", "ComCard")
-	MifAccMain.new(app)
-	app.create
-	app.run
-end 
+  app = Fox::FXApp.new("MifAccMain", "ComCard")
+  MifAccMain.new(app)
+  app.create
+  app.run
+end
 
