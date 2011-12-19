@@ -36,7 +36,6 @@ class MainWindow < Fox::FXMainWindow
       FXHorizontalFrame.new(theFrame, LAYOUT_FILL_X|LAYOUT_FILL_Y){|hex_frame|
         FXLabel.new(hex_frame, 'Hex-Eingabe (3 Byte):')
         @hex_input = FXTextField.new(hex_frame,0, nil, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X){|this|
-          this.setFocus
           this.connect(SEL_COMMAND, method(:hex_changed))
           this.text = 'FF 07 80'
         }
@@ -98,6 +97,7 @@ class MainWindow < Fox::FXMainWindow
   def create
     super
     show(PLACEMENT_SCREEN)
+    @hex_input.setFocus
   end
 
   def display_error
