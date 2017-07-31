@@ -97,7 +97,9 @@ class MainWindow < Fox::FXMainWindow
   def create
     super
     show(PLACEMENT_SCREEN)
-    @hex_input.setFocus
+    app.addTimeout(1) do
+      @hex_input.setFocus
+    end
   end
 
   def display_error
