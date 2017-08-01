@@ -14,7 +14,7 @@ require 'fox16/colors'
 
 
 module MifareAccessConditionBuilder
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 
 class MainWindow < Fox::FXMainWindow
   include Fox
