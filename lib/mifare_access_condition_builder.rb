@@ -23,7 +23,7 @@ class MainWindow < Fox::FXMainWindow
 
   def initialize(app)
     # Initialize base class
-    super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 750, 230)
+    super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 750, 290)
 
     # Tooltips einschalten und auf dauerhafte Anzeige einstellen.
     FXToolTip.new(getApp(), TOOLTIP_PERMANENT)
@@ -89,6 +89,8 @@ class MainWindow < Fox::FXMainWindow
         end
         @acc_blocks << acc_block
       }
+
+      FXLabel.new(theFrame, DESCRIPTION_TEXT, opts: JUSTIFY_LEFT)
     }
     # sinnvolle default-Werte in Felder eintragen
     hex_changed
@@ -190,25 +192,32 @@ class MainWindow < Fox::FXMainWindow
   DataBitsHead = ['bits','','read', 'write', 'increment', 'dec,tran,dec', 'description']
   DataBitsDesc = {
     '000' => ['A|B¹', 'A|B¹', 'A|B¹', 'A|B¹', 'transport config'],
-    '010' => ['A|B¹', '-', '-', '-', 'read/write block'],
-    '100' => ['A|B¹', 'B¹', '-', '-', 'read/write block'],
-    '110' => ['A|B¹', 'B¹', 'B¹', 'A|B¹', 'value block'],
-    '001' => ['A|B¹', '-', '-', 'A|B¹', 'value block'],
-    '011' => ['B¹', 'B¹', '-', '-', 'read/write block'],
-    '101' => ['B¹', '-', '-', '-', 'read/write block'],
-    '111' => ['-', '-', '-', '-', 'read/write block'],
+    '010' => ['A|B¹', '-'   , '-'   , '-'   , 'read/write block'],
+    '100' => ['A|B¹', 'B¹'  , '-'   , '-'   , 'read/write block'],
+    '110' => ['A|B¹', 'B¹'  , 'B¹'  , 'A|B¹', 'value block'],
+    '001' => ['A|B¹', '-'   , '-'   , 'A|B¹', 'value block'],
+    '011' => ['B¹'  , 'B¹'  , '-'   , '-'   , 'read/write block'],
+    '101' => ['B¹'  , '-'   , '-'   , '-'   , 'read/write block'],
+    '111' => ['-'   , '-'   , '-'   , '-'   , 'read/write block'],
   }
   TrailerBitsHead = ['bits','', 'read A', 'write A', 'read ACC', 'write ACC', 'read B', 'write B', 'description']
   TrailerBitsDesc = {
-    '000' => ['-', 'A', 'A', '-', 'A', 'A', 'Key B may be read'],
-    '010' => ['-', '-', 'A', '-', 'A', '-', 'Key B may be read'],
+    '000' => ['-', 'A', 'A'  , '-', 'A', 'A', 'Key B may be read'],
+    '010' => ['-', '-', 'A'  , '-', 'A', '-', 'Key B may be read'],
     '100' => ['-', 'B', 'A|B', '-', '-', 'B', ' '],
     '110' => ['-', '-', 'A|B', '-', '-', '-', ' '],
-    '001' => ['-', 'A', 'A', 'A', 'A', 'A', 'Key B may be read, transport config'],
+    '001' => ['-', 'A', 'A'  , 'A', 'A', 'A', 'Key B may be read, transport config'],
     '011' => ['-', 'B', 'A|B', 'B', '-', 'B', ' '],
     '101' => ['-', '-', 'A|B', 'B', '-', '-', ' '],
     '111' => ['-', '-', 'A|B', '-', '-', '-', ' '],
   }
+
+  DESCRIPTION_TEXT = <<-EOT
+[1] If key B may be read in the corresponding Sector Trailer it cannot serve for authentication.
+As a consequences, if the reader authenticates any block of a sector which uses such
+access conditions for the Sector Trailer and using key B, the card will refuse any subsequent memory
+access after authentication.
+  EOT
 
   def display_bits_desc
     @acc_blocks.each_with_index{|acc_block, blidx|
