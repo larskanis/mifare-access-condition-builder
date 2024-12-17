@@ -23,7 +23,7 @@ class MainWindow < Fox::FXMainWindow
 
   def initialize(app)
     # Initialize base class
-    super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 750, 250)
+    super(app, "Mifare Access Condition Builder #{VERSION}", nil, nil, DECOR_ALL, 0, 0, 750, 250)
 
     # Tooltips einschalten und auf dauerhafte Anzeige einstellen.
     FXToolTip.new(getApp(), TOOLTIP_PERMANENT)
