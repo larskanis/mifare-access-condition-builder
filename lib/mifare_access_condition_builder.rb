@@ -216,12 +216,12 @@ class MainWindow < Fox::FXMainWindow
         descs = TrailerBitsDesc[acc_block.bits.text] || Array.new(6,'')
       else
         trailer = TrailerBitsDesc[@acc_blocks.last.bits.text]
-        descss = DataBitsDesc[acc_block.bits.text] || [Array.new(4,'')]*2
+        ws_descs, wr_descs, desc = DataBitsDesc[acc_block.bits.text] || [Array.new(4,'')]*2
         if trailer && trailer[4].tr("-","").empty?
-          descs = descss[0] # Key B can't be read
+          descs = ws_descs + [desc] # Key B can't be read
           acc_block.key_b_readable = false
         else
-          descs = descss[1] # Key B may be read
+          descs = wr_descs + [desc] # Key B may be read
           acc_block.key_b_readable = true
         end
       end
