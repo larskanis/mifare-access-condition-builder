@@ -19,11 +19,11 @@ VERSION = '1.0.2'
 class MainWindow < Fox::FXMainWindow
   include Fox
 
-  AccBlock = Struct.new :bits, :descs
+  AccBlock = Struct.new :bits, :descs, :key_b_readable
 
   def initialize(app)
     # Initialize base class
-    super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 750, 290)
+    super(app, "Mifare Access Conditions", nil, nil, DECOR_ALL, 0, 0, 750, 250)
 
     # Tooltips einschalten und auf dauerhafte Anzeige einstellen.
     FXToolTip.new(getApp(), TOOLTIP_PERMANENT)
@@ -61,7 +61,7 @@ class MainWindow < Fox::FXMainWindow
               this.backColor = FXColor::LightGoldenrod1
               bits_field = acc_block.bits
               this.connect(SEL_LEFTBUTTONPRESS){|sender, sel, ptr|
-                desc_clicked(sender, sel, ptr, bits_field, :data)
+                desc_clicked(sender, sel, ptr, bits_field, acc_block.key_b_readable ? :data_key_b_readable : :data_key_b_secret)
               }
             }
           end
@@ -89,8 +89,6 @@ class MainWindow < Fox::FXMainWindow
         end
         @acc_blocks << acc_block
       }
-
-      FXLabel.new(theFrame, DESCRIPTION_TEXT, opts: JUSTIFY_LEFT)
     }
     # sinnvolle default-Werte in Felder eintragen
     hex_changed
@@ -119,14 +117,14 @@ class MainWindow < Fox::FXMainWindow
 #     puts "hex-input: #{hex}"
 
     bits = nil
-    display_error{
+    display_error do
       bits = acc_hex_to_bits(hex)
-#       puts bits
+      # puts bits
 
-      @acc_blocks.each_with_index{|bl, blidx|
+      @acc_blocks.each_with_index do |bl, blidx|
         bl.bits.text = bits[blidx]
-      }
-    }
+      end
+    end
 
     display_bits_desc
   end
@@ -136,10 +134,10 @@ class MainWindow < Fox::FXMainWindow
 #     puts "bits-input: #{blocksbits.inspect}"
 
     hex = ''
-    display_error{
+    display_error do
       hex = acc_bits_to_hex(blocksbits).upcase
 #       puts hex
-    }
+    end
     display_bits_desc
 
     @hex_input.text = [hex[0,2], hex[2,2], hex[4..-1]].join(" ")
@@ -154,14 +152,14 @@ class MainWindow < Fox::FXMainWindow
 
     blocksbits = ['','','','']
     nibbles = [hex[2,1].hex, hex[5,1].hex, hex[4,1].hex]
-    nibbles.each{|nibble|
+    nibbles.each do |nibble|
 #       puts "nibble: #{nibble.inspect}"
-      blocksbits.each_with_index{|blockbits, bbidx|
+      blocksbits.each_with_index do |blockbits, bbidx|
         onoff = (nibble >> bbidx) & 1
 #         puts "onoff: #{onoff.inspect} bits: #{blockbits.inspect}"
         blockbits << (onoff>0 ? '1' : '0')
-      }
-    }
+      end
+    end
     hex2 = acc_bits_to_hex(blocksbits)
     raise InvalidArgument, "Hex-Daten sind inkonsistent: #{hex}!=#{hex2}" unless hex.upcase==hex2.upcase
 
@@ -171,18 +169,18 @@ class MainWindow < Fox::FXMainWindow
   def acc_bits_to_hex(blocksbits)
     raise InvalidArgument, "Bits fuer 4 Bloecke erwartet: #{blocksbits.inspect}" unless blocksbits.length==4
 
-    blocksbits.each_with_index{|bit, bidx|
+    blocksbits.each_with_index do |bit, bidx|
       raise InvalidArgument, "3 Bit String für Block #{bidx} erwartet: #{bit.inspect}" unless bit=~/^[0-1]{3,3}$/i
-    }
+    end
 
     nibbles = [0,0,0]
-    blocksbits.each_with_index{|blockbits, bbidx|
-      nibbles.each_with_index{|nibble, nidx|
+    blocksbits.each_with_index do |blockbits, bbidx|
+      nibbles.each_with_index do |nibble, nidx|
         onoff = blockbits[nidx,1].hex
         nibble |= onoff << bbidx
         nibbles[nidx] = nibble
-      }
-    }
+      end
+    end
     return sprintf("%x%x%x%x%x%x",
       nibbles[1] ^ 0xf, nibbles[0] ^ 0xf,
       nibbles[0], nibbles[2] ^ 0xf,
@@ -191,14 +189,14 @@ class MainWindow < Fox::FXMainWindow
 
   DataBitsHead = ['bits','','read', 'write', 'increment', 'dec,tran,dec', 'description']
   DataBitsDesc = {
-    '000' => ['A|B¹', 'A|B¹', 'A|B¹', 'A|B¹', 'transport config'],
-    '010' => ['A|B¹', '-'   , '-'   , '-'   , 'read/write block'],
-    '100' => ['A|B¹', 'B¹'  , '-'   , '-'   , 'read/write block'],
-    '110' => ['A|B¹', 'B¹'  , 'B¹'  , 'A|B¹', 'value block'],
-    '001' => ['A|B¹', '-'   , '-'   , 'A|B¹', 'value block'],
-    '011' => ['B¹'  , 'B¹'  , '-'   , '-'   , 'read/write block'],
-    '101' => ['B¹'  , '-'   , '-'   , '-'   , 'read/write block'],
-    '111' => ['-'   , '-'   , '-'   , '-'   , 'read/write block'],
+    '000' => [['A|B', 'A|B', 'A|B', 'A|B'], ['A', 'A', 'A', 'A'], 'transport config'],
+    '010' => [['A|B', '-'  , '-'  , '-'  ], ['A', '-', '-', '-'], 'read/write block'],
+    '100' => [['A|B', 'B'  , '-'  , '-'  ], ['A', '-', '-', '-'], 'read/write block'],
+    '110' => [['A|B', 'B'  , 'B'  , 'A|B'], ['A', '-', '-', 'A'], 'value block'],
+    '001' => [['A|B', '-'  , '-'  , 'A|B'], ['A', '-', '-', 'A'], 'value block'],
+    '011' => [['B'  , 'B'  , '-'  , '-'  ], ['-', '-', '-', '-'], 'read/write block'],
+    '101' => [['B'  , '-'  , '-'  , '-'  ], ['-', '-', '-', '-'], 'read/write block'],
+    '111' => [['-'  , '-'  , '-'  , '-'  ], ['-', '-', '-', '-'], 'read/write block'],
   }
   TrailerBitsHead = ['bits','', 'read A', 'write A', 'read ACC', 'write ACC', 'read B', 'write B', 'description']
   TrailerBitsDesc = {
@@ -212,26 +210,27 @@ class MainWindow < Fox::FXMainWindow
     '111' => ['-', '-', 'A|B', '-', '-', '-', ' '],
   }
 
-  DESCRIPTION_TEXT = <<-EOT
-[1] If key B may be read in the corresponding Sector Trailer it cannot serve for authentication.
-As a consequences, if the reader authenticates any block of a sector which uses such
-access conditions for the Sector Trailer and using key B, the card will refuse any subsequent memory
-access after authentication.
-  EOT
-
   def display_bits_desc
-    @acc_blocks.each_with_index{|acc_block, blidx|
+    @acc_blocks.each_with_index do |acc_block, blidx|
       if blidx==3
         descs = TrailerBitsDesc[acc_block.bits.text] || Array.new(6,'')
       else
-        descs = DataBitsDesc[acc_block.bits.text] || Array.new(4,'')
+        trailer = TrailerBitsDesc[@acc_blocks.last.bits.text]
+        descss = DataBitsDesc[acc_block.bits.text] || [Array.new(4,'')]*2
+        if trailer && trailer[4].tr("-","").empty?
+          descs = descss[0] # Key B can't be read
+          acc_block.key_b_readable = false
+        else
+          descs = descss[1] # Key B may be read
+          acc_block.key_b_readable = true
+        end
       end
       descs.each_with_index{|desc, descidx| acc_block.descs[descidx].text = desc.to_s }
-    }
+    end
   end
 
   def desc_clicked(sender, sel, ptr, bits_field, data_or_trailer)
-    sd = SelectionDialog.new(data_or_trailer, sender, "Select Access Conditions", DECOR_ALL)
+    sd = SelectionDialog.new(data_or_trailer, sender, "Select Access Conditions", opts: DECOR_ALL, height: 320, width: 600)
     if sd.execute > 0
       bits = sd.selected_bits
       bits_field.text = bits
@@ -247,52 +246,53 @@ access after authentication.
     def initialize(data_or_trailer, *args)
       super(*args)
 
-      if data_or_trailer == :data
+      if data_or_trailer == :data_key_b_readable || data_or_trailer == :data_key_b_secret
         FXLabel.new(self, "Mögliche Bit-Kombinationen für Datenblöcke:")
 
-        FXMatrix.new(self, 7, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
-          DataBitsHead.each{|labeltext|
+        FXMatrix.new(self, 7, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) do |matrix|
+          DataBitsHead.each do |labeltext|
             FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
-          }
+          end
 
-          for bits, descs in DataBitsDesc.sort do
+          DataBitsDesc.sort.each do |bits, (ws_descs, wr_descs, desc)|
+            descs = (data_or_trailer == :data_key_b_readable ? wr_descs : ws_descs) + [desc]
             field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::LightGoldenrod1 }
             FXLabel.new(matrix,'->')
             for desc in descs
-              FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this|
+              FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY) do |this|
                 this.backColor = FXColor::LightGoldenrod1
                 b = bits
-                this.connect(SEL_LEFTBUTTONPRESS){
+                this.connect(SEL_LEFTBUTTONPRESS) do
                   @selected_bits = b
                   self.handle(self, FXSEL(SEL_COMMAND, ID_ACCEPT), nil)
-                }
-              }
+                end
+              end
             end
           end
-        }
+        end
       elsif data_or_trailer == :trailer
         FXLabel.new(self, "Mögliche Bit-Kombinationen für Trailerblöcke:")
 
-        FXMatrix.new(self, 9, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0){|matrix|
-          TrailerBitsHead.each{|labeltext|
+        FXMatrix.new(self, 9, MATRIX_BY_COLUMNS | LAYOUT_FILL_X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) do |matrix|
+          TrailerBitsHead.each do |labeltext|
             FXLabel.new(matrix, labeltext, nil, LAYOUT_FILL_COLUMN|LAYOUT_FILL_X)
-          }
+          end
 
-          for bits, descs in TrailerBitsDesc.sort do
+          TrailerBitsDesc.each do |bits, descs|
             field = FXLabel.new(matrix, bits, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this| this.backColor = FXColor::PaleGreen }
             FXLabel.new(matrix,'->')
             for desc in descs
-              FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY){|this|
+              FXLabel.new(matrix, desc, nil, TEXTFIELD_NORMAL|LAYOUT_FILL_COLUMN|LAYOUT_FILL_X|TEXTFIELD_READONLY) do |this|
                 this.backColor = FXColor::PaleGreen
                 b = bits
-                this.connect(SEL_LEFTBUTTONPRESS){
+                this.connect(SEL_LEFTBUTTONPRESS) do
                   @selected_bits = b
                   self.handle(self, FXSEL(SEL_COMMAND, ID_ACCEPT), nil)
-                }
-              }
+                end
+              end
             end
           end
-        }
+        end
       end
     end
   end
