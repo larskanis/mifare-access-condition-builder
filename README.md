@@ -1,31 +1,35 @@
-= mifare-access-condition-builder
+mifare-access-condition-builder
+===============================
 
-* http://comdb1/projektverwaltung/projects/mif-acc-cond-builder
+https://github.com/larskanis/mifare-access-condition-builder
 
-== DESCRIPTION:
+A GUI to calculate the access condition bytes of sectors of Mifare contactless chip cards
 
-Calculate the access condition bytes of mifare sectors
+REQUIREMENTS
+------------
 
-== FEATURES/PROBLEMS:
+* Ruby
+* Fox toolkit (required on MacOS and Linux, builtin on Windows)
 
-* with GUI
+INSTALL + RUN
+--------------
 
-== SYNOPSIS:
+* On Windows install the Rubyinstaller (with or without Devkit) https://rubyinstaller.org/downloads/
+* On Linux use `sudo apt install ruby-dev g++ libxrandr-dev libfox-1.6-dev` or similar
 
+Then run on the command line:
 
-== REQUIREMENTS:
+```sh
+$ gem install mifare-access-condition-builder
+$ mifare_access_condition_builder
+```
 
-* fxruby 1.6
-
-== INSTALL:
-
-* gem install mifare-access-condition-builder
-
-== LICENSE:
+LICENSE
+-------
 
 (The MIT License)
 
-Copyright (c) 2011 FIX
+Copyright (c) 2024 Lars Kanis - Sincnovation Falkenstein GmbH
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

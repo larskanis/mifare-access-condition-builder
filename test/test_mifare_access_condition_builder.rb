@@ -1,8 +1,9 @@
-require "test/unit"
-require "mifare_access_condition_builder"
+# frozen_string_literal: true
 
-class TestMifareAccessConditionBuilder < Test::Unit::TestCase
-  def test_sanity
-    flunk "write tests or I will kneecap you"
+require "test_helper"
+
+class TestMifareAccessConditionBuilder < Minitest::Test
+  def test_that_it_has_a_version_number
+    refute_nil ::MifareAccessConditionBuilder::VERSION
   end
 end

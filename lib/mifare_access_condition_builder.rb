@@ -12,9 +12,9 @@ require 'rubygems'
 require 'fox16'
 require 'fox16/colors'
 
-
 module MifareAccessConditionBuilder
-VERSION = '1.1.0'
+
+autoload :VERSION, 'mifare_access_condition_builder/version'
 
 class MainWindow < Fox::FXMainWindow
   include Fox

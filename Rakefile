@@ -1,12 +1,11 @@
-# -*- ruby -*-
+# frozen_string_literal: true
 
-require 'rubygems'
-require 'hoe'
+require "bundler/gem_tasks"
+require "minitest/test_task"
+require "rubocop/rake_task"
 
-Hoe.spec 'mifare-access-condition-builder' do
-  developer('Lars Kanis', 'lars.kanis@sincnovation.com')
+Minitest::TestTask.create
+RuboCop::RakeTask.new
 
-  extra_deps << ['fxruby', '>= 1.6.0']
-end
-
-# vim: syntax=ruby
+task default: %i[test rubocop]
+task gem: :build
