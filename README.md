@@ -24,6 +24,8 @@ $ gem install mifare-access-condition-builder
 $ mifare_access_condition_builder
 ```
 
+![Screenshot](screenshot.png?raw=true "GUI of the mifare-access-condition-builder")
+
 LICENSE
 -------
 
